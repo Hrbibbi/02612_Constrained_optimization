@@ -52,6 +52,7 @@ function InteriorPoint(H,g,A,b,C,d,x0)
         Hbar = H+C*diag(SinvZ)*C';
         [L,D,P] = ldl([Hbar -A;-A',zeros(size(A,2))]);
         %disp(A)
+
         %---------------------------------
         % Affine Direction step 
         %---------------------------------
@@ -66,9 +67,14 @@ function InteriorPoint(H,g,A,b,C,d,x0)
         %---------------------------------
         %  First alpha step
         %---------------------------------
-        alpha_aff = [-z./deltaZaff;-s./deltaSaff];
-        alpha_aff = min(alpha_aff([deltaZaff<0;deltaSaff<0]));
 
+        alpha_aff = [-z./deltaZaff;-s./deltaSaff];
+        num_zeros=alpha_aff([deltaZaff<0;deltaSaff<0]);
+        if size(num_zeros,1)==0
+            alpha_aff = 1;
+        else 
+            alpha_aff = min(alpha_aff([deltaZaff<0;deltaSaff<0]));
+        end
         %---------------------------------
         % Duality Gap
         %---------------------------------
@@ -89,9 +95,14 @@ function InteriorPoint(H,g,A,b,C,d,x0)
         %---------------------------------
         % Second alpha step
         %---------------------------------
-        alpha = [-z./deltaZ;-s./deltaS];
-        alpha = min(alpha([deltaZ<0;deltaS<0]));
 
+        alpha = [-z./deltaZ;-s./deltaS];
+        num_zeros=alpha([deltaZ<0;deltaS<0]);
+        if size(num_zeros,1)==0 
+            alpha = 0;
+        else
+            alpha = min(alpha([deltaZ<0;deltaS<0]));
+        end
         %---------------------------------
         % Update step
         %---------------------------------
