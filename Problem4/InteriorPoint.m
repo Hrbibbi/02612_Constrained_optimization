@@ -32,26 +32,35 @@ function [x,y,z] = InteriorPoint(H,g,A,b,C,d,x0)
         %---------------------------------
         % Precomputation step good
         %---------------------------------
+
         SinvZ = z./s; ZinvS = s./z;
         % Setup LDL and factorize
         Hbar = H+C*diag(SinvZ)*C';
-        [L,D,P] = ldl([Hbar -A;-A',zeros(size(A,2))]);
+        [L,D,P] = ldl([Hbar -A;-A',zeros(size(A,2))]); %good
 
         %---------------------------------
         % Affine Direction step 
         %---------------------------------
+
+        %Proposed change to improve speed
+        %rBarL = rL- C * ( SinvZ.*(rC-rSZ./z) )
         rBarL = rL-C*diag(SinvZ)*(rC-rSZ./z);
-        temp = P*(L'\(D\(L\(P'*[-rBarL;-rA]))));
+
+        temp = P*(L'\(D\(L\(P'*[-rBarL;-rA])))); %good
         deltaXaff = temp(1:length(x));
         deltaYaff = temp(1+length(x):end);
+
+        %Proposed change to improve speed
+        %deltaZaff = -SinvZ .* C'*deltaXaff + SinvZ .* (rC-rSZ./z)
         deltaZaff = -diag(SinvZ)*C'*deltaXaff+diag(SinvZ)*(rC-rSZ./z);
+     
         deltaSaff = -rSZ./z-ZinvS.*deltaZaff;
 
         %---------------------------------
         %  First alpha step
         %---------------------------------
 
-        alpha_aff = [-z./deltaZaff;-s./deltaSaff];
+        alpha_aff = [-z./deltaZaff;-s./deltaSaff]; %good
         num_zeros=alpha_aff([deltaZaff<0;deltaSaff<0]);
         if size(num_zeros,1)==0
             alpha_aff = 1;
@@ -61,18 +70,20 @@ function [x,y,z] = InteriorPoint(H,g,A,b,C,d,x0)
         %---------------------------------
         % Duality Gap
         %---------------------------------
+
         mu_aff = mean((z+alpha_aff*deltaZaff).*(s+alpha_aff*deltaSaff));
         sigma = (mu_aff/mu)^3;
 
         %---------------------------------
         % Correction step
         %---------------------------------
+
         rSZ_bar = (rSZ+deltaSaff.*deltaZaff-sigma*mu);
         rBarL = rL-C*(SinvZ.*(rC-rSZ_bar./z));
         temp = P*(L'\(D\(L\(P'*[-rBarL;-rA])))); %was rA not -rA before
         deltaX = temp(1:length(x));
         deltaY = temp(1+length(x):end);
-        deltaZ = -diag(SinvZ)*C'*deltaX+SinvZ.*(rC-rSZ_bar./z);
+        deltaZ = -SinvZ.*C'*deltaX+SinvZ.*(rC-rSZ_bar./z);
         deltaS = -rSZ_bar./z-ZinvS.*deltaZ;
 
         %---------------------------------
