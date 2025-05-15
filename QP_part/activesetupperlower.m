@@ -1,4 +1,4 @@
-function [x] = activesetupperlower(H,g,C,l,u,dl,du)
+function [x, lambda_l, lambda_u, lambda_Cneg, lambda_C] = activesetupperlower(H,g,C,l,u,dl,du)
     %---------------------------
     %     Initalization step
     %---------------------------
@@ -11,7 +11,8 @@ function [x] = activesetupperlower(H,g,C,l,u,dl,du)
     b = [ -l;           u;        -dl;     du   ];
     
     n_constraints = size(A,2);
-    
+    lambda_full = zeros(n_constraints, 1);
+
     % start at lower‐bound corner:
     x = l;
     Workingset = 1:n;
@@ -37,6 +38,8 @@ function [x] = activesetupperlower(H,g,C,l,u,dl,du)
         if norm(p) < tol
             if all(lambda >= 0)
             %Converged
+            lambda_full(:) = 0;
+            lambda_full(Workingset) = lambda;
             break
             else
             %Constraint update
@@ -61,4 +64,8 @@ function [x] = activesetupperlower(H,g,C,l,u,dl,du)
             end
         end
     end
+    lambda_l     = lambda_full(1:200);            % x ≥ l
+    lambda_u     = lambda_full(200+1:400);        % x ≤ u
+    lambda_C     = lambda_full(401:600);    % C^T x ≤ du
+    lambda_Cneg  = lambda_full(601:end);    % C^T x ≥ dl
 end

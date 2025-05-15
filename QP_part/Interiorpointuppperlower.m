@@ -1,4 +1,4 @@
-function [x] = Interiorpointuppperlower(x0,H,g,C,l,u,dl,du)
+function [x,yl,yu,zl,zu] = Interiorpointuppperlower(x0,H,g,C,l,u,dl,du)
     %---------------------------------
     % Initialization step
     %---------------------------------
