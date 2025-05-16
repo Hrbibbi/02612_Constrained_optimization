@@ -50,20 +50,42 @@ function [c,dc,ddc] = InEQcon(x);
 end
 
 % Initial guess:
-x0 = [-3; 0]; y0 = 1;
+x0 = [1; -1]; y0 = 1;
 xl = [-4;-2.5]; xu = [1;4];
 cl = [-18]; cu = [34];
+
+
+
+% Draw Contour plot
 contourplt(@objective,@EQcon,@InEQcon,cl,cu,xl,xu,[-4.5,4.5,-4.5,4.5],100);
-exportgraphics(gcf,'Himmelblau.png','Resolution',300)
+exportgraphics(gcf,['Himmelblau.png'],'Resolution',300)
+
+% Solve using fmincon
 [x] = fminconWrapper(x0);
-exportgraphics(gcf,'Himmelblau_fmincon_-3_0.png','Resolution',300)
+exportgraphics(gcf,['Himmelblau_fmincon_' num2str(x0(1)) '_' num2str(x0(2)) '.png'],'Resolution',300)
+
+% Solve using ipopt
 contourplt(@objective,@EQcon,@InEQcon,cl,cu,xl,xu,[-4.5,4.5,-4.5,4.5],100);
 [x] = IpoptWrapper(x0);
-exportgraphics(gcf,'Himmelblau_ipopt_-3_0.png','Resolution',300)
+exportgraphics(gcf,['Himmelblau_ipopt_' num2str(x0(1)) '_' num2str(x0(2)) '.png'],'Resolution',300)
+
+% Solve using SQP Line Search with full hessian
 contourplt(@objective,@EQcon,@InEQcon,cl,cu,xl,xu,[-4.5,4.5,-4.5,4.5],100);
-[x] = SQPLineSearchSolver(x0,@objective,@EQcon,@InEQcon,cl,cu,xl,xu,false);
-exportgraphics(gcf,'Himmelblau_linesearch_-3_0.png','Resolution',300)
+[x,it] = SQPSolver(x0,@objective,@EQcon,@InEQcon,cl,cu,xl,xu,false,'LineSearch');
+exportgraphics(gcf,['Himmelblau_linesearch_' num2str(x0(1)) '_' num2str(x0(2)) '.png'],'Resolution',300)
+
+% Solve using SQP Line Search with BFGS
 contourplt(@objective,@EQcon,@InEQcon,cl,cu,xl,xu,[-4.5,4.5,-4.5,4.5],100);
-[x] = SQPLineSearchSolver(x0,@objective,@EQcon,@InEQcon,cl,cu,xl,xu,true);
-exportgraphics(gcf,'Himmelblau_linesearch_BFGS_-3_0.png','Resolution',300)
+[x,it] = SQPSolver(x0,@objective,@EQcon,@InEQcon,cl,cu,xl,xu,true,'LineSearch');
+exportgraphics(gcf,['Himmelblau_linesearch_BFGS_' num2str(x0(1)) '_' num2str(x0(2)) '.png'],'Resolution',300)
+
+% Solve using SQP Trust region with full hessian
+contourplt(@objective,@EQcon,@InEQcon,cl,cu,xl,xu,[-4.5,4.5,-4.5,4.5],100);
+[x,it] = SQPSolver(x0,@objective,@EQcon,@InEQcon,cl,cu,xl,xu,false,'TrustRegion',0.5);
+exportgraphics(gcf,['Himmelblau_trustregion_' num2str(x0(1)) '_' num2str(x0(2)) '.png'],'Resolution',300)
+
+% Solve using SQP Trust region with BFGS
+contourplt(@objective,@EQcon,@InEQcon,cl,cu,xl,xu,[-4.5,4.5,-4.5,4.5],100);
+[x,it] = SQPSolver(x0,@objective,@EQcon,@InEQcon,cl,cu,xl,xu,true,'TrustRegion',0.5);
+exportgraphics(gcf,['Himmelblau_trustregion_BFGS_' num2str(x0(1)) '_' num2str(x0(2)) '.png'],'Resolution',300)
 
