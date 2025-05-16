@@ -23,18 +23,18 @@ Pd = x_linprog(16:end);
 
 disp('Total generation (MW):'), disp(sum(Pg))
 disp('Total demand (MW):'), disp(sum(Pd))
-disp('Market clearing price (€/MW):'), disp(lambda.eqlin)  % dual variable of Aeq
+disp('Market clearing price (€/MW):'), disp(lambda.eqlin)
 
-sorted_C = sort(C);                % ascending for supply
-sorted_U = sort(U,'descend');      % descending for demand
+sorted_C = sort(C);
+sorted_U = sort(U,'descend');
 
-cum_Pg = cumsum(Pg_max);           % total capacity per generator
-cum_Pd = cumsum(Pd_max);           % total capacity per demand
+cum_Pg = cumsum(Pg_max);
+cum_Pd = cumsum(Pd_max);
 
 figure;
 hold on;
-stairs([0; cum_Pg], [0; sorted_C], 'b', 'LineWidth', 2)    % supply
-stairs([0; cum_Pd], [0; sorted_U], 'r', 'LineWidth', 2)    % demand
+stairs([0; cum_Pg], [0; sorted_C], 'b', 'LineWidth', 2)
+stairs([0; cum_Pd], [0; sorted_U], 'r', 'LineWidth', 2)
 xlabel('Energy quantity (MW)')
 ylabel('Price (€/MW)')
 legend('Supply', 'Demand')

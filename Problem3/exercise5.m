@@ -13,9 +13,7 @@ function x_sol = InteriorPoint(g, A, b, l, u, x0, epsilon)
              eye(n), eye(n)];
 
     b = [b;u];
-
     g = [g; zeros(n, 1)];
-
     x = [x0;s];
 
     %the program is now in standard LP form
@@ -26,13 +24,13 @@ function x_sol = InteriorPoint(g, A, b, l, u, x0, epsilon)
     lambda = ones(size(x));
     mu = zeros(size(b));
 
-    for k = 0:100
+    %centering parameter
+    sigma = 0.1;
+
+    for k = 1:100
 
         %compute the duality measure
         s = (x'*lambda)/length(x);
-
-        %centering parameter
-        sigma = 0.1;
 
         %compute residuals
         rL = g - A'*mu - lambda;
