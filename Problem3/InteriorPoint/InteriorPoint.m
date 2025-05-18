@@ -1,4 +1,4 @@
-function [x_sol, objective, times] = InteriorPoint(g, A, b, l, u, x0, epsilon)
+function [x_sol, objective, times] = InteriorPoint(g, A, b, x0, epsilon)
     warning('off', 'MATLAB:nearlySingularMatrix');
     %% convert to standard form
     %get the size of x
@@ -6,13 +6,6 @@ function [x_sol, objective, times] = InteriorPoint(g, A, b, l, u, x0, epsilon)
 
     % make the slack variable vector for all inequalities x <= u
     s = ones(n, 1);
-
-    %now we update the variables to be in standard form
-    A = [A', zeros(1, n)
-             eye(n), eye(n)];
-
-    b = [b;u];
-    g = [g; zeros(n, 1)];
     x = [x0;s];
 
     %the program is now in standard LP form
