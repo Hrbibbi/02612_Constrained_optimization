@@ -9,6 +9,7 @@ Cn = length(C);
 Un = length(U);
 
 g = [C;-U];
+lenx = length(g);
 A = [-ones(Cn,1);ones(Un,1)];
 b = 0;
 u = [Pg_max; Pd_max];
@@ -32,8 +33,11 @@ epsilon = 1e-8;
 
 %% Active set
 tic;
-x0 = feasiblePointLinprog(A_std, b_std);
+x0 = feaseiblePointSimplex(A_std, b_std);
+feasible_time = toc*1000;
 [x_AS, objective_AS, times_AS] = Simplex(g_std, A_std, x0);
+x_AS = x_AS(1:lenx);
+times_AS = times_AS + ones(size(times_AS))*feasible_time;
 
 %% plotting
 figure;
