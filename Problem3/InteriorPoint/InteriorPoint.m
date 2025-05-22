@@ -1,4 +1,4 @@
-function [x_sol, objective, times] = InteriorPoint(g, A, b, x0, epsilon)
+function [x_sol, objective, times, rLs, rAs, rSZs] = InteriorPoint(g, A, b, x0, epsilon)
     warning('off', 'MATLAB:nearlySingularMatrix');
     %% convert to standard form
     %get the size of x
@@ -22,6 +22,10 @@ function [x_sol, objective, times] = InteriorPoint(g, A, b, x0, epsilon)
     objective = g'*x;
     times = 0;
 
+    rLs = [];
+    rAs = [];
+    rSZs = [];
+
     for k = 1:100
         tic;
         %compute the duality measure
@@ -30,6 +34,9 @@ function [x_sol, objective, times] = InteriorPoint(g, A, b, x0, epsilon)
         %compute residuals
         rL = g - A'*mu - lambda;
         rA = A*x - b;
+
+        size(rL)
+        size(rA)
 
         %check convergence
         %fprintf('Iteration %3i, |r_L| = %6.4e, |r_A| = %6.4e \n', k, norm(rL), norm(rA))
@@ -50,8 +57,13 @@ function [x_sol, objective, times] = InteriorPoint(g, A, b, x0, epsilon)
                diaglambda, zeros(lenx,lenA),       diagX];
 
         e = ones(lenx, 1);
+        rSZ = -diagX*diaglambda*e+ sigma*s*e;
+        
+        rLs = [rLs; norm(rL)];
+        rAs = [rAs; norm(rA)];
+        rSZs = [rSZs; norm(rSZ)];
 
-        rhs = [-rL; -rA; -diagX*diaglambda*e+ sigma*s*e];
+        rhs = [-rL; -rA; rSZ];
 
         sol = KKT \ rhs;
 

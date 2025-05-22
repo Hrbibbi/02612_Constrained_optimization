@@ -1,4 +1,4 @@
-function [x_sol, objective, times] = Simplex(g, A, x)
+function [x_sol, objective, times, rLs, rAs, rSZs] = Simplex(g, A, b, x)
     
     %create set N of all i where xi = 0
     %and set B with all the other xi (xi > 0)
@@ -9,6 +9,12 @@ function [x_sol, objective, times] = Simplex(g, A, x)
     objective = g'*x;
     times = 0;
 
+
+    rLs = [];
+    rAs = [];
+    rSZs = [];
+
+
     for k = 0:100
         tic;
 
@@ -18,6 +24,14 @@ function [x_sol, objective, times] = Simplex(g, A, x)
         N = A(:,Nset);
         mu = B'\g(Bset);
         lambdaN = g(Nset) - N'*mu;
+
+        lambda = zeros(length(x), 1);
+        lambda(Nset) = lambdaN;
+
+        rLs = [rLs; norm(g - A' * mu - lambda)];
+        rAs = [rAs; norm(A*x-b)];
+        rSZs = [rSZs; norm(x.*lambda)];
+
 
         if all(lambdaN>=0)
             fprintf("Simplex: iteration %i problem converged\n", k)
